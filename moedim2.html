@@ -218,6 +218,107 @@ window.onload = async function () {
     renderThree(parshiot, index, previousShabbat, currentShabbat, nextShabbat);
 };
 </script>
+<!-- not sure where this goes -->
+<script>
+window.onload = async function () {
 
+    // Load perpetual Israeli parshiot.json
+    async function loadParshiot() {
+        const response = await fetch('parshiot.json');
+        const data = await response.json();
+        return data.parshiot;
+    }
+
+    // Get the upcoming Shabbat (Saturday)
+    function getCurrentShabbat() {
+        const today = new Date();
+        const day = today.getDay(); // 0=Sun ... 6=Sat
+        const diff = (6 - day + 7) % 7;
+        const shabbat = new Date(today);
+        shabbat.setDate(today.getDate() + diff);
+        return shabbat;
+    }
+
+    // Add or subtract days
+    function addDays(date, days) {
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+    }
+
+    // Gregorian date formatting
+    function formatGregorian(d) {
+        return d.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    }
+
+    // Hebrew date formatting
+    function toHebrewDate(gDate) {
+        return new Intl.DateTimeFormat("he-u-ca-hebrew", {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }).format(gDate);
+    }
+
+    // Combined date format
+    function formatFullDate(d) {
+        return `${formatGregorian(d)} • ${toHebrewDate(d)}`;
+    }
+
+    // Determine week number of the year
+    function getWeekNumber(date) {
+        const start = new Date(date.getFullYear(), 0, 1);
+        const diff = date - start;
+        return Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+    }
+
+    // Render previous, current, next parsha
+    function renderThree(parshiot, index, prevDate, currDate, nextDate) {
+        const container = document.getElementById('parsha-container');
+        container.innerHTML = "";
+
+        const prev = parshiot[(index - 1 + parshiot.length) % parshiot.length];
+        const curr = parshiot[index];
+        const next = parshiot[(index + 1) % parshiot.length];
+
+        const list = [
+            { p: prev, d: prevDate },
+            { p: curr, d: currDate },
+            { p: next, d: nextDate }
+        ];
+
+        list.forEach(item => {
+            container.innerHTML += `
+                <div class="parsha-card">
+                    <div class="parsha-date">${formatFullDate(item.d)}</div>
+                    <div class="hebrew">${item.p.nameHe}</div>
+                    <div class="bigger">${item.p.nameEn}</div>
+                    <p><strong>Torah:</strong> ${item.p.torah}</p>
+                    <p><strong>Haftarah:</strong> ${item.p.haftarah}</p>
+                    <p><strong>Brit Chadashah:</strong> ${item.p.brit}</p>
+                </div>
+            `;
+        });
+    }
+
+    // MAIN EXECUTION
+    const parshiot = await loadParshiot();
+
+    const currentShabbat = getCurrentShabbat();
+    const previousShabbat = addDays(currentShabbat, -7);
+    const nextShabbat = addDays(currentShabbat, 7);
+
+    const weekNumber = getWeekNumber(currentShabbat);
+    const index = weekNumber % parshiot.length;
+
+    renderThree(parshiot, index, previousShabbat, currentShabbat, nextShabbat);
+};
+</script>
+
+<!-- This ends here -->
 </body>
 </html>
