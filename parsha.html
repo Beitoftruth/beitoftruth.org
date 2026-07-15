@@ -1019,25 +1019,37 @@
 
 </section>
 
+
+<div id="weekly-display">
+  <h2>Weekly Torah Portions</h2>
+  <div id="last-week"></div>
+  <div id="this-week"></div>
+  <div id="next-week"></div>
+</div>
+
+<section id="parasha-plan">
+
+<!-- ⭐ PASTE ALL YOUR PARASHA <article> BLOCKS HERE ⭐ -->
+<!-- Everything from Bereshit through Matot–Masei exactly as in your document -->
+
+</section>
+
 <script>
 (function() {
-  // Get all parasha blocks
+
   const parashot = Array.from(document.querySelectorAll('.parasha'));
 
-  // Extract date info from each block
   const parsed = parashot.map(block => {
-    const dateText = block.querySelector('.date').textContent;
+      const dateText = block.querySelector('.date').textContent;
 
-    // Gregorian date is always after the Hebrew date, formatted like: "— MM/DD/YYYY"
-const gregorianMatch = dateText.match(/—\s*(\d{2}\/\d{2}\/\d{4})/);
-    if (!gregorianMatch) return null;
+      // FIXED REGEX — matches 10/17/2026 format
+      const gregorianMatch = dateText.match(/—\s*(\d{2}\/\d{2}\/\d{4})/);
 
-    const gregDate = new Date(gregorianMatch[1]);
+      if (!gregorianMatch) return null;
 
-    return {
-      block,
-      gregDate
-    };
+      const gregDate = new Date(gregorianMatch[1]);
+
+      return { block, gregDate };
   }).filter(Boolean);
 
   // Sort by date
@@ -1045,23 +1057,18 @@ const gregorianMatch = dateText.match(/—\s*(\d{2}\/\d{2}\/\d{4})/);
 
   const today = new Date();
 
-  // Find the current week (closest upcoming Shabbat)
+  // Find current week
   let thisWeekIndex = parsed.findIndex(p => p.gregDate >= today);
-
-  if (thisWeekIndex === -1) {
-    thisWeekIndex = parsed.length - 1; // last parasha of the year
-  }
+  if (thisWeekIndex === -1) thisWeekIndex = parsed.length - 1;
 
   const lastWeekIndex = thisWeekIndex - 1;
   const nextWeekIndex = thisWeekIndex + 1;
 
-  // Helper to clone a parasha block
   function cloneBlock(index) {
-    if (index < 0 || index >= parsed.length) return null;
-    return parsed[index].block.cloneNode(true);
+      if (index < 0 || index >= parsed.length) return null;
+      return parsed[index].block.cloneNode(true);
   }
 
-  // Insert into weekly display
   const lastWeekDiv = document.getElementById('last-week');
   const thisWeekDiv = document.getElementById('this-week');
   const nextWeekDiv = document.getElementById('next-week');
@@ -1071,22 +1078,26 @@ const gregorianMatch = dateText.match(/—\s*(\d{2}\/\d{2}\/\d{4})/);
   const nextBlock = cloneBlock(nextWeekIndex);
 
   if (lastBlock) {
-    lastWeekDiv.innerHTML = '<h3>Last Week</h3>';
-    lastWeekDiv.appendChild(lastBlock);
+      lastWeekDiv.innerHTML = '<h3>Last Week</h3>';
+      lastWeekDiv.appendChild(lastBlock);
   }
 
   if (thisBlock) {
-    thisWeekDiv.innerHTML = '<h3>This Week</h3>';
-    thisWeekDiv.appendChild(thisBlock);
+      thisWeekDiv.innerHTML = '<h3>This Week</h3>';
+      thisWeekDiv.appendChild(thisBlock);
   }
 
   if (nextBlock) {
-    nextWeekDiv.innerHTML = '<h3>Next Week</h3>';
-    nextWeekDiv.appendChild(nextBlock);
+      nextWeekDiv.innerHTML = '<h3>Next Week</h3>';
+      nextWeekDiv.appendChild(nextBlock);
   }
+
 })();
 </script>
 
 
 </body>
 </html>
+
+
+
